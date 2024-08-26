@@ -82,13 +82,6 @@ async function main() {
         {
           type: "function",
           function: {
-            function: getComponentStorybookFile,
-            parameters: zodToJsonSchema(GetStoryParameters),
-          },
-        },
-        {
-          type: "function",
-          function: {
             function: listDirectory,
             parameters: zodToJsonSchema(GetDirectoryParameters),
           },
