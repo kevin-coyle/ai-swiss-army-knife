@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import fs from "fs";
 import OpenAI from "openai";
 import readline from "readline";
@@ -5,8 +6,6 @@ import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import * as path from "path";
 
-const COMPONENT_SOURCE =
-  "/home/kevincoyle/dev/clients/bigmedium/nasdaq/generator-lab/src/components";
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -33,6 +32,10 @@ const GetDirectoryParameters = z.object({
   directory: z.string(),
 });
 
+const GetRunCommandParameters = z.object({
+  command: z.string(),
+});
+
 async function main() {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -45,30 +48,16 @@ async function main() {
   const systemPrompt = {
     role: "system",
     content: `
-    You are a experienced web developer who will have be given a custom-elements.json file and some examples for a lit3 based design system.
-    You will be given an instruction from the user and you are to write some HTML code using the design system.
-    Don't use JSON.stringify in the .data attribute for nef-rich table.
-    If you are going to use a component and you've not seen the storybook file for it ALWAYS get it and read it first. The component file names for that look like Alert, Drawer, Button, Rich-table etc.
-    Only use the design system components. For example <nef-button>. Use the custom-elements.json file to figure out how to use the design system. Don't write a file unless the user asks specifically.`,
+    You are a experienced web developer who will have be given access to a linux or mac based system that you will use to write components with..
+    You will be given an instruction from the user and you are to do what they ask.`,
   };
 
-  let chatHistory = [
-    systemPrompt,
-    {
-      role: "user",
-      content: `Here is the custom-elements file: ${customElementsfile}`,
-    },
-    {
-      role: "user",
-      content: `Here is the stories file which will show you how to use the component: ${storiesFile}`,
-    },
-    { role: "user", content: `Here is the data file: ${dataFile}` },
-  ];
+  let chatHistory = [systemPrompt];
 
   while (true) {
-    const query = await new Promise((resolve) => {
+    const query = (await new Promise((resolve) => {
       rl.question("Please enter your query: ", resolve);
-    });
+    })) as string;
 
     chatHistory.push({ role: "user", content: query });
 
@@ -102,6 +91,13 @@ async function main() {
           function: {
             function: listDirectory,
             parameters: zodToJsonSchema(GetDirectoryParameters),
+          },
+        },
+        {
+          type: "function",
+          function: {
+            function: runCommand,
+            parameters: zodToJsonSchema(GetRunCommandParameters),
           },
         },
       ],
@@ -143,12 +139,16 @@ function listDirectory(options: string) {
   }
   return files;
 }
-function getComponentStorybookFile(options: string) {
-  console.log("Getting Storybook File..." + options);
-  const { componentFileName } = JSON.parse(options);
-  const storiesFile = `${COMPONENT_SOURCE}/${componentFileName}/${componentFileName}.stories.ts`;
-  if (!fs.existsSync(storiesFile)) {
-    return "File does not exist or is not readable";
+
+async function runCommand(options: string) {
+  const { command } = JSON.parse(options);
+  console.log("Running Command..." + command);
+  const util = require("util");
+  const exec = util.promisify(require("child_process").exec);
+  try {
+    const { stdout, stderr } = await exec(command);
+    return { stdout, stderr };
+  } catch (error) {
+    return { error: error.message, stderr: error.stderr };
   }
-  return fs.readFileSync(storiesFile, "utf8");
 }
