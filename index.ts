@@ -3,9 +3,7 @@ import OpenAI from "openai";
 import readline from "readline";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import * as path from "path";
-import SerpApi from "google-search-results-nodejs";
-import puppeteer from "puppeteer";
+import openaiTokenCounter from "openai-gpt-token-counter";
 import {
   writeCode,
   readFile,
@@ -129,6 +127,8 @@ async function main() {
 
     const aiReply = (await runner.finalContent()) as string;
     console.log(aiReply);
+    const tokenCount = openaiTokenCounter.chat(chatHistory, "gpt-4o");
+    console.log("Token Count: ", tokenCount);
     chatHistory.push({ role: "assistant", content: aiReply });
   }
 }

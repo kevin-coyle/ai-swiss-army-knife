@@ -16,7 +16,7 @@ async function viewWebsite(options: string) {
     console.log(content);
     return {
       title,
-      content: content.substring(0, 1000), // Limiting content to first 1000 characters
+      content: content,
     };
   } catch (error) {
     if (error instanceof Error) {
