@@ -10,10 +10,35 @@ async function viewWebsite(options: string) {
     await page.goto(url, { waitUntil: "networkidle0" });
 
     const title = await page.title();
-    const content = await page.content();
+    let content = await page.content();
+
+    // Clean up the content
+    const cleanContent = (html: string): string => {
+      // Extract title
+      const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+      const extractedTitle = titleMatch ? titleMatch[1] : "";
+
+      // Remove head section
+      html = html.replace(/<head>[\s\S]*?<\/head>/i, "");
+
+      // Remove script tags
+      html = html.replace(
+        /<(script|style)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>/gi,
+        "",
+      );
+
+      // Remove all HTML tags
+      html = html.replace(/<[^>]*>/g, "");
+
+      // Trim whitespace and normalize spaces
+      html = html.trim().replace(/\s+/g, " ");
+
+      return html;
+    };
+
+    content = cleanContent(content);
 
     await browser.close();
-    console.log(content);
     return {
       title,
       content: content,
