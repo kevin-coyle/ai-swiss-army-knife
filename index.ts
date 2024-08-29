@@ -13,7 +13,7 @@ import {
   googleSearch,
   viewWebsite,
 } from "./functions";
-import { systemPrompt } from "./systemPrompt";}
+import { systemPrompt } from "./systemPrompt";
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -60,7 +60,7 @@ async function main() {
   const currentDateString = new Date().toISOString().replace(/:/g, "-");
   const systemPromptMessage = {
     role: "system",
-    content: systemPrompt
+    content: systemPrompt,
   };
 
   let chatHistory = [systemPromptMessage];
