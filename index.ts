@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import fs from "fs";
 import OpenAI from "openai";
 import readline from "readline";
