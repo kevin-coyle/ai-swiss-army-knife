@@ -29,12 +29,7 @@ async function main() {
     output: process.stdout,
   });
 
-  const systemPromptMessage = {
-    role: "system",
-    content: systemPrompt,
-  };
-
-  let chatHistory = [systemPromptMessage];
+  let chatHistory = [];
 
   while (true) {
     const query = (await new Promise((resolve) => {
