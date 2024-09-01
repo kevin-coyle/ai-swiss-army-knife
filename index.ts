@@ -12,6 +12,8 @@ import {
   runCommand,
   googleSearch,
   viewWebsite,
+  countLetter,
+  countWords,
 } from "./functions";
 import { systemPrompt } from "./systemPrompt";
 const openai = new OpenAI({
@@ -50,6 +52,15 @@ const GetGoogleSearchParameters = z.object({
 
 const GetViewWebsiteParameters = z.object({
   url: z.string().url(),
+});
+
+const GetCountLettersParameters = z.object({
+  letter: z.string(),
+  word: z.string(),
+});
+
+const GetCountWordsParameters = z.object({
+  text: z.string(),
 });
 
 async function main() {
@@ -116,6 +127,21 @@ async function main() {
           function: {
             function: viewWebsite,
             parameters: zodToJsonSchema(GetViewWebsiteParameters),
+          },
+        },
+        {
+          type: "function",
+          function: {
+            function: countLetter,
+            description: "Count a single letter in a word.",
+            parameters: zodToJsonSchema(GetCountLettersParameters),
+          },
+        },
+        {
+          type: "function",
+          function: {
+            function: countWords,
+            parameters: zodToJsonSchema(GetCountWordsParameters),
           },
         },
       ],

@@ -30,13 +30,16 @@ async function main() {
   });
 
   let chatHistory = [];
-
+  let skipPrompt = false;
   while (true) {
-    const query = (await new Promise((resolve) => {
-      rl.question("Please enter your query: ", resolve);
-    })) as string;
-
-    chatHistory.push({ role: "user", content: query });
+    console.log(chatHistory);
+    if (!skipPrompt) {
+      const query = (await new Promise((resolve) => {
+        rl.question("Please enter your query: ", resolve);
+      })) as string;
+      chatHistory.push({ role: "user", content: query });
+      skipPrompt = false;
+    }
 
     try {
       const response = await anthropic.messages.create({
@@ -51,15 +54,45 @@ async function main() {
 
       response.content.forEach((message: any) => {
         if (message.type === "tool_use") {
+          console.log(message);
+          const toolId = message.id;
           const toolName = message.name;
           const toolParams = message.input;
           if (toolName === "listDirectory") {
-            console.log(listDirectory(JSON.stringify(toolParams)));
+            const result = listDirectory(JSON.stringify(toolParams));
+            // {
+            //   "role": "user",
+            //   "content": [
+            //     {
+            //       "type": "tool_result",
+            //       "tool_use_id": "toolu_01A09q90qw90lq917835lq9",
+            //       "content": "15 degrees"
+            //     }
+            //   ]
+            // }
+            chatHistory.push({
+              role: "assistant",
+              content: [message],
+            });
+            chatHistory.push({
+              role: "user",
+              content: [
+                {
+                  type: "tool_result",
+                  tool_use_id: toolId,
+                  content: JSON.stringify(result),
+                },
+              ],
+            });
+            skipPrompt = true;
           }
+        } else {
+          chatHistory.push({
+            role: "assistant",
+            content: message.text,
+          });
         }
       });
-
-      chatHistory.push({ role: "assistant", content: response.content });
     } catch (error) {
       console.error("Error communicating with Claude:", error);
     }
