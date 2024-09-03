@@ -66,19 +66,23 @@ const GetHandleImageParameters = z.object({
 });
 
 function createPreamble() {
-  console.log("Welcome to the Big Medium Swiss Army Knife Tool");
   console.log(
-    "This tool is designed to help you with a variety of tasks, including:",
+    chalk.bold.cyan("Welcome to the Big Medium Swiss Army Knife Tool"),
   );
-  console.log("- Writing code");
-  console.log("- Reading files");
-  console.log("- Running commands");
-  console.log("- Searching Google");
-  console.log("- Viewing websites");
-  console.log("- Counting letters and words");
-  console.log("- Handling images");
-  console.log("- Listing directories");
-  console.log("- And more!");
+  console.log(
+    chalk.yellow(
+      "This tool is designed to help you with a variety of tasks, including:",
+    ),
+  );
+  console.log(chalk.green("- Writing code"));
+  console.log(chalk.green("- Reading files"));
+  console.log(chalk.green("- Running commands"));
+  console.log(chalk.green("- Searching Google"));
+  console.log(chalk.green("- Viewing websites"));
+  console.log(chalk.green("- Counting letters and words"));
+  console.log(chalk.green("- Handling images"));
+  console.log(chalk.green("- Listing directories"));
+  console.log(chalk.green("- And more!"));
   console.log("To read images type in read_image FILENAME");
 }
 
