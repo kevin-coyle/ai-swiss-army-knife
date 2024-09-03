@@ -5,6 +5,7 @@ import readline from "readline";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import openaiTokenCounter from "openai-gpt-token-counter";
+import chalk from "chalk";  // Add chalk import
 import {
   writeCode,
   readFile,
@@ -64,7 +65,25 @@ const GetHandleImageParameters = z.object({
   imagePath: z.string().nonempty(),
 });
 
+function createPreamble() {
+  console.log("Welcome to the Big Medium Swiss Army Knife Tool");
+  console.log(
+    "This tool is designed to help you with a variety of tasks, including:",
+  );
+  console.log("- Writing code");
+  console.log("- Reading files");
+  console.log("- Running commands");
+  console.log("- Searching Google");
+  console.log("- Viewing websites");
+  console.log("- Counting letters and words");
+  console.log("- Handling images");
+  console.log("- Listing directories");
+  console.log("- And more!");
+  console.log("To read images type in read_image FILENAME");
+}
+
 async function main() {
+  createPreamble();
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -79,7 +98,7 @@ async function main() {
 
   while (true) {
     const query = (await new Promise((resolve) => {
-      rl.question("Please enter your ai query: ", resolve);
+      rl.question(chalk.yellowBright("Please enter your ai query: "), resolve);  // Style query prompt
     })) as string;
     if (query === "exit") {
       break;
@@ -179,7 +198,7 @@ async function main() {
     });
 
     const aiReply = (await runner.finalContent()) as string;
-    console.log(aiReply);
+    console.log(chalk.green(aiReply));  // Style AI reply
     const tokenCount = openaiTokenCounter.chat(chatHistory, "gpt-4o");
     console.log("Token Count: ", tokenCount);
     chatHistory.push({ role: "assistant", content: aiReply });
