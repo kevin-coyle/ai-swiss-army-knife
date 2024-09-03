@@ -5,7 +5,7 @@ import readline from "readline";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import openaiTokenCounter from "openai-gpt-token-counter";
-import chalk from "chalk";  // Add chalk import
+import chalk from "chalk"; // Add chalk import
 import {
   writeCode,
   readFile,
@@ -98,7 +98,10 @@ async function main() {
 
   while (true) {
     const query = (await new Promise((resolve) => {
-      rl.question(chalk.yellowBright("Please enter your ai query: "), resolve);  // Style query prompt
+      rl.question(
+        chalk.black.bgYellow("Please enter your ai query: "),
+        resolve,
+      ); // Style query prompt
     })) as string;
     if (query === "exit") {
       break;
@@ -198,7 +201,7 @@ async function main() {
     });
 
     const aiReply = (await runner.finalContent()) as string;
-    console.log(chalk.green(aiReply));  // Style AI reply
+    console.log(chalk.green(aiReply)); // Style AI reply
     const tokenCount = openaiTokenCounter.chat(chatHistory, "gpt-4o");
     console.log("Token Count: ", tokenCount);
     chatHistory.push({ role: "assistant", content: aiReply });
