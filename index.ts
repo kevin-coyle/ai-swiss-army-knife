@@ -92,7 +92,6 @@ async function main() {
     input: process.stdin,
     output: process.stdout,
   });
-  const currentDateString = new Date().toISOString().replace(/:/g, "-");
   const systemPromptMessage = {
     role: "system",
     content: systemPrompt,
@@ -103,7 +102,7 @@ async function main() {
   while (true) {
     const query = (await new Promise((resolve) => {
       rl.question(
-        chalk.black.bgYellow("Please enter your ai query: "),
+        chalk.black.bold.bgYellow("Please enter your ai query: "),
         resolve,
       ); // Style query prompt
     })) as string;
