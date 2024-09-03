@@ -15,15 +15,12 @@ import {
   countLetter,
   countWords,
 } from "./functions";
+import { handleImage } from "./functions/handleImage";
 import { systemPrompt } from "./systemPrompt";
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-type options = {
-  code: string;
-  fileName: string;
-};
 
 const GetWriteFileParameters = z.object({
   code: z.string(),
@@ -63,6 +60,10 @@ const GetCountWordsParameters = z.object({
   text: z.string(),
 });
 
+const GetHandleImageParameters = z.object({
+  imagePath: z.string().nonempty(),
+});
+
 async function main() {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -78,10 +79,40 @@ async function main() {
 
   while (true) {
     const query = (await new Promise((resolve) => {
-      rl.question("Please enter your query: ", resolve);
+      rl.question("Please enter your ai query: ", resolve);
     })) as string;
-
+    if (query === "exit") {
+      break;
+    }
+    if (!query) {
+      continue;
+    }
     chatHistory.push({ role: "user", content: query });
+    if (query.startsWith("read_image")) {
+      const imagePath = query.split(" ")[1];
+      if (imagePath) {
+        let imageBase64;
+        try {
+          imageBase64 = await handleImage({ imagePath });
+        } catch (error) {
+          console.error("Error handling image:", error);
+          continue;
+        }
+        chatHistory.push({
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${imageBase64.base64Image}`,
+              },
+            },
+          ],
+        });
+      } else {
+        console.log("Please provide an image path after 'read_image'");
+      }
+    }
 
     const runner = openai.beta.chat.completions.runTools({
       model: "gpt-4o",
