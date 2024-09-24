@@ -23,6 +23,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const modelName = "gpt-4o-2024-08-06";
+
 const GetWriteFileParameters = z.object({
   code: z.string(),
   fileName: z.string(),
@@ -67,7 +69,7 @@ const GetHandleImageParameters = z.object({
 
 function createPreamble() {
   console.log(
-    chalk.bold.cyan("Welcome to the Big Medium Swiss Army Knife Tool"),
+    chalk.bold.cyan("Welcome to the Swiss Army Knife Tool"),
   );
   console.log(
     chalk.yellow(
@@ -93,7 +95,7 @@ async function main() {
     output: process.stdout,
   });
   const systemPromptMessage = {
-    role: "system",
+    role: modelName !== "o1-mini" ? "system" : "user",
     content: systemPrompt,
   };
 
@@ -109,7 +111,8 @@ async function main() {
     if (query === "exit") {
       break;
     }
-    if (!query) {
+    if (!query || query === null) {
+      console.log(query, "No query");
       continue;
     }
     chatHistory.push({ role: "user", content: query });
@@ -140,7 +143,7 @@ async function main() {
     }
 
     const runner = openai.beta.chat.completions.runTools({
-      model: "gpt-4o",
+      model: modelName,
       messages: chatHistory,
       tools: [
         {
@@ -168,6 +171,8 @@ async function main() {
           type: "function",
           function: {
             function: runCommand,
+            description:
+              "Run a command in the terminal. This is for non interactive commands only and will timeout after 60s",
             parameters: zodToJsonSchema(GetRunCommandParameters),
           },
         },
@@ -203,11 +208,15 @@ async function main() {
       ],
     });
 
-    const aiReply = (await runner.finalContent()) as string;
+    let aiReply = (await runner.finalContent()) as string;
     console.log(chalk.green(aiReply)); // Style AI reply
+    if (aiReply === null) {
+      console.log(runner);
+      aiReply = "done";
+    }
+    chatHistory.push({ role: "assistant", content: aiReply });
     const tokenCount = openaiTokenCounter.chat(chatHistory, "gpt-4o");
     console.log("Token Count: ", tokenCount);
-    chatHistory.push({ role: "assistant", content: aiReply });
   }
 }
 
