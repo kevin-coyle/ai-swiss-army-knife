@@ -6,3 +6,4 @@ export { default as googleSearch } from "./googleSearch";
 export { default as viewWebsite } from "./viewWebsite";
 export { default as countLetter } from "./letterCounter";
 export { default as countWords } from "./wordCounter";
+export { default as checkEbay } from "./checkEbay";
