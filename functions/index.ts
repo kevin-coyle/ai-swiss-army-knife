@@ -7,3 +7,5 @@ export { default as viewWebsite } from "./viewWebsite";
 export { default as countLetter } from "./letterCounter";
 export { default as countWords } from "./wordCounter";
 export { default as checkEbay } from "./checkEbay";
+export { default as appendSessionNote } from "./appendSessionNote";
+export { default as getSessionNotes } from "./getSessionNotes";
